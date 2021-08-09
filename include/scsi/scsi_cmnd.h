@@ -241,14 +241,14 @@ static inline int scsi_sg_copy_to_buffer(struct scsi_cmnd *cmd,
 
 static inline sector_t scsi_get_sector(struct scsi_cmnd *scmd)
 {
-	return blk_rq_pos(scmd->request);
+	return blk_rq_pos(scsi_cmd_to_rq(scmd));
 }
 
 static inline sector_t scsi_get_lba(struct scsi_cmnd *scmd)
 {
 	unsigned int shift = ilog2(scmd->device->sector_size) - SECTOR_SHIFT;
 
-	return blk_rq_pos(scmd->request) >> shift;
+	return blk_rq_pos(scsi_cmd_to_rq(scmd)) >> shift;
 }
 
 /*
