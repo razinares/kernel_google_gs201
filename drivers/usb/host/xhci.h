@@ -1737,7 +1737,7 @@ struct xhci_port {
 	int			hcd_portnum;
 	struct xhci_hub		*rhub;
 	struct xhci_port_cap	*port_cap;
-	unsigned long		resume_done;
+	unsigned long		resume_timestamp;
 	bool			rexit_active;
 	struct completion	rexit_done;
 	struct completion	u3exit_done;
