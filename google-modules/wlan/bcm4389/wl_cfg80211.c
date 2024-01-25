@@ -14861,7 +14861,7 @@ exit:
 #ifdef WL_FILS
 static s32
 wl_fillup_resp_params(struct bcm_cfg80211 *cfg, struct net_device *ndev,
-	u8 *curbssid, void *params, u32 status)
+	u8 *curbssid, void *params, u32 status, struct cfg80211_bss *bss)
 {
 	struct wl_connect_info *conn_info = wl_to_conn(cfg);
 	struct cfg80211_connect_resp_params *resp_params;
@@ -14881,8 +14881,7 @@ wl_fillup_resp_params(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 	resp_params = (struct cfg80211_connect_resp_params *)params;
 	resp_params->status = status;
 	resp_params->bssid = curbssid;
-	resp_params->bss = CFG80211_GET_BSS(wiphy, NULL, curbssid,
-		ssid->SSID, ssid->SSID_len);
+	resp_params->bss = bss;
 	if (!resp_params->bss) {
 		WL_ERR(("null bss\n"));
 		return BCME_ERROR;
@@ -15028,7 +15027,7 @@ wl_bss_connect_done(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 			goto exit;
 		}
 
-		if (wl_fillup_resp_params(cfg, ndev, curbssid, &resp_params, status) != BCME_OK) {
+		if (wl_fillup_resp_params(cfg, ndev, curbssid, &resp_params, status, bss) != BCME_OK) {
 			WL_ERR(("connect resp_params failure\n"));
 			err = BCME_ERROR;
 			goto exit;
