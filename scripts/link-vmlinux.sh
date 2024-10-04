@@ -77,10 +77,7 @@ modpost_link()
 
 	objects="--whole-archive				\
 		${KBUILD_VMLINUX_OBJS}				\
-		--no-whole-archive				\
-		--start-group					\
-		${KBUILD_VMLINUX_LIBS}				\
-		--end-group"
+		${KBUILD_VMLINUX_LIBS}"
 
 	if [ -n "${CONFIG_LTO_CLANG}" ]; then
 		gen_initcalls
