@@ -860,6 +860,7 @@ static bool memperf_work(void)
 	int cpu;
 
 	/* Only consider active CPUs */
+	cpus_read_lock();
 	cpumask_copy(&cpus, cpu_active_mask);
 
 	/* Get the current MIF freq, since something else could've raised it */
@@ -929,6 +930,7 @@ static bool memperf_work(void)
 		pmu->prev = pmu->cur;
 		raw_spin_unlock_irq(&pmu->lock);
 	}
+	cpus_read_unlock();
 
 	return ret;
 }
