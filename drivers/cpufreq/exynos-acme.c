@@ -21,6 +21,7 @@
 #include <linux/pm_opp.h>
 #include <linux/suspend.h>
 #include <linux/platform_device.h>
+#include <linux/tensor_aio.h>
 
 #include <soc/google/cal-if.h>
 #include <soc/google/ect_parser.h>
@@ -248,7 +249,15 @@ static void update_thermal_pressure(struct exynos_cpufreq_domain *domain, int df
 	capacity = (domain->dfs_throttle_count > 0) ? min_capacity : capacity;
 #endif
 
-	arch_set_thermal_pressure(maskp, max_capacity - capacity);
+	if (IS_ENABLED(CONFIG_ARM_TENSOR_AIO_DEVFREQ)) {
+		unsigned int capped_freq;
+
+		capped_freq = capacity == min_capacity ?
+			      policy->cpuinfo.min_freq : domain->max_freq_qos;
+		tensor_aio_cpufreq_pressure(cpumask_any(maskp), capped_freq);
+	} else {
+		arch_set_thermal_pressure(maskp, max_capacity - capacity);
+	}
 	spin_unlock(&domain->thermal_update_lock);
 
 	cpufreq_cpu_put(policy);
