@@ -10,6 +10,7 @@
 
 #include <linux/eh.h>
 #include "eh_regs.h"
+#include <linux/pm_qos.h>
 #include <linux/spinlock_types.h>
 #include <linux/wait.h>
 
@@ -98,5 +99,7 @@ struct eh_device {
 
 	/* keep pending request */
 	struct eh_sw_fifo sw_fifo;
+
+	struct pm_qos_request pm_qos_req;
 };
 #endif

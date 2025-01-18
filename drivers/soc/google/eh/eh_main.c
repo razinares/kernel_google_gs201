@@ -678,9 +678,12 @@ static int __noreturn eh_comp_thread(void *data)
 	while (1) {
 		int ret;
 
+		cpu_latency_qos_update_request(&eh_dev->pm_qos_req,
+					       PM_QOS_DEFAULT_VALUE);
 		wait_event_freezable(eh_dev->comp_wq,
 			atomic_read(&eh_dev->nr_request) ||
 			!sw_fifo_empty(&eh_dev->sw_fifo));
+		cpu_latency_qos_update_request(&eh_dev->pm_qos_req, 100);
 
 		ret = eh_process_compress(eh_dev);
 		if (unlikely(ret < 0)) {
@@ -734,6 +737,10 @@ static int eh_sw_init(struct eh_device *eh_dev, int error_irq, int comp_irq)
 	atomic_set(&eh_dev->nr_request, 0);
 	init_waitqueue_head(&eh_dev->comp_wq);
 
+	eh_dev->pm_qos_req.type = PM_QOS_REQ_AFFINE_IRQ;
+	eh_dev->pm_qos_req.irq = eh_dev->comp_irq;
+	cpu_latency_qos_add_request(&eh_dev->pm_qos_req, PM_QOS_DEFAULT_VALUE);
+
 	eh_dev->comp_thread = kthread_run(eh_comp_thread, eh_dev, "eh_comp_thread");
 	if (IS_ERR(eh_dev->comp_thread)) {
 		ret = PTR_ERR(eh_dev->comp_thread);
@@ -747,6 +754,7 @@ static int eh_sw_init(struct eh_device *eh_dev, int error_irq, int comp_irq)
 	return 0;
 
 free_error_irq:
+	cpu_latency_qos_remove_request(&eh_dev->pm_qos_req);
 	free_irq(eh_dev->error_irq, eh_dev);
 free_comp_irq:
 	free_irq(eh_dev->comp_irq, eh_dev);
